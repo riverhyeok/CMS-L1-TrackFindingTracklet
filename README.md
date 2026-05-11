@@ -5,8 +5,10 @@ This readme followed the above repo's procedure.
 1. CMSSW Environment Setup (First-time Initialization)
 Run these steps only once when setting up the environment on a new server.
 
-# 1. Setup el8 cms environment in  server terminal(REF: https://cms-sw.github.io/tutorial-merge-usercode-repository-in-cmssw.html
+# 1. Setup el8 cms environment in  server terminal
 /cvmfs/cms.cern.ch/common/cmssw-el8
+
+(Ref: https://cms-sw.github.io/tutorial-merge-usercode-repository-in-cmssw.html)
 
 # 2. Source the CMSSW environment variables
 source /cvmfs/cms.cern.ch/cmsset_default.sh
