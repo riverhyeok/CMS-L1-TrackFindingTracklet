@@ -223,7 +223,7 @@ These plots are used to determine the optimal hard-cut threshold for the final F
 
 ---
 
-# 6. Future Work
+# 5. Future Work
 
 `Analyzerxx.cc` has not yet been studied.
 
