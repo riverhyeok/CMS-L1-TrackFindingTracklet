@@ -1,8 +1,14 @@
 # CMS-L1-TrackFindingTracklet
 https://github.com/cms-sw/cmssw/tree/master/L1Trigger/TrackFindingTracklet
 This readme followed the above repo's procedure.
+# 0. Daily Setup( After you setup the environment)
+/cvmfs/cms.cern.ch/common/cmssw-el8
 
-# 1. CMSSW Environment Setup (First-time Initialization)
+cd ~/CMSSW_15_1_0_pre4/src
+cmsenv
+cd L1Trigger/TrackFindingTracklet/test/
+
+# 1. CMSSW Environment Setup
 Run these steps only once when setting up the environment on a new server.
 
 ## 1. Setup el8 cms environment in  server terminal
@@ -34,7 +40,7 @@ git clone https://github.com/cms-L1TK/MCsamples.git
 ## 3. Add the Tracklet package to your local workspace
 git cms-addpkg L1Trigger/TrackFindingTracklet
 
-#3.Algorithm Configuration & Compilation
+# 3.Algorithm Configuration & Compilation
 Switch the baseline HYBRID tracking algorithm (4-parameter fit, prompt tracks) to the HYBRID_DISPLACED mode (5-parameter fit, extended tracking) and compile the code.
 
 ## 1. Modify the configuration file to use the DISPLACED algorithm (or you can edit it by yourself)
@@ -63,7 +69,9 @@ makeHists.csh  make plots from root file by running ROOT macros L1TrackNtuplePlo
 
 
 # 5. Output plots
+
 L1TrackNtuplePlot.C (Outputs in TrkPlots/):Visualizes basic tracking performance metrics. Key plots include tracking efficiency vs. (p_T,eta), Fake Rate distributions, Duplicate Rate, and Kalman Filter chi^2 distributions.
+
 L1TrackQualityPlot.C (Outputs in MVA_plots/):Evaluates the Boosted Decision Tree (BDT) performance of the Track Quality (TQ) module. Key plots include the MVA Score distribution and the ROC curve, which are critical for determining the optimal hard-cut threshold for the final FPGA firmware.
 
 # 6. Plan
