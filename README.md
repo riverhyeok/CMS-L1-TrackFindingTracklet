@@ -2,57 +2,57 @@
 https://github.com/cms-sw/cmssw/tree/master/L1Trigger/TrackFindingTracklet
 This readme followed the above repo's procedure.
 
-1. CMSSW Environment Setup (First-time Initialization)
+# 1. CMSSW Environment Setup (First-time Initialization)
 Run these steps only once when setting up the environment on a new server.
 
-# 1. Setup el8 cms environment in  server terminal
+## 1. Setup el8 cms environment in  server terminal
 /cvmfs/cms.cern.ch/common/cmssw-el8
 
 (Ref: https://cms-sw.github.io/tutorial-merge-usercode-repository-in-cmssw.html)
 
-# 2. Source the CMSSW environment variables
+## 2. Source the CMSSW environment variables
 source /cvmfs/cms.cern.ch/cmsset_default.sh
 
-# 3. Create a CMSSW release area (Version: 15.1.0_pre4)
+## 3. Create a CMSSW release area (Version: 15.1.0_pre4)
 cd ~
 cmsrel CMSSW_15_1_0_pre4
 
-# 4. Navigate to the working directory and load the environment
+## 4. Navigate to the working directory and load the environment
 cd CMSSW_15_1_0_pre4/src
 cmsenv
 
 
-2. Firmware Branch & Sample Download
+# 2. Firmware Branch & Sample Download
 Fetch the L1 tracking development branch(Not sure the example is right...) and local MC sample data to avoid XRootD authentication/timeout errors.
-# 1. Initialize git-cms and check out the specific firmware synchronization branch
+## 1. Initialize git-cms and check out the specific firmware synchronization branch
 git cms-init
 git cms-checkout-topic -u cms-L1TK:fw_synch_250903
 
-# 2. Clone local MC samples (D98 Geometry) to bypass remote server issues
+## 2. Clone local MC samples (D98 Geometry) to bypass remote server issues
 git clone https://github.com/cms-L1TK/MCsamples.git
 
-# 3. Add the Tracklet package to your local workspace
+## 3. Add the Tracklet package to your local workspace
 git cms-addpkg L1Trigger/TrackFindingTracklet
 
-3.Algorithm Configuration & Compilation
+#3.Algorithm Configuration & Compilation
 Switch the baseline HYBRID tracking algorithm (4-parameter fit, prompt tracks) to the HYBRID_DISPLACED mode (5-parameter fit, extended tracking) and compile the code.
 
-# 1. Modify the configuration file to use the DISPLACED algorithm (or you can edit it by yourself)
+## 1. Modify the configuration file to use the DISPLACED algorithm (or you can edit it by yourself)
 sed -i "s/L1TRKALGO = 'HYBRID'/L1TRKALGO = 'HYBRID_DISPLACED'/g" L1Trigger/TrackFindingTracklet/test/L1TrackNtupleMaker_cfg.py
 
-# 2. Compile the package using 8 cores for faster building
+## 2. Compile the package using 8 cores for faster building
 scram b -j 8
 
-4. Running the Emulation & Analysis
+# 4. Running the Emulation & Analysis
 Run the event loop to generate the ROOT Ntuple and use the provided macros to create performance evaluation plots.
 
-# 1. Navigate to the test directory
+## 1. Navigate to the test directory
 cd L1Trigger/TrackFindingTracklet/test/
 
-# 2. Execute the CMSSW emulation (Generates L1TrkNtuple.root)
+## 2. Execute the CMSSW emulation (Generates L1TrkNtuple.root)
 cmsRun L1TrackNtupleMaker_cfg.py
 
-# 3. Run the automated plotting script to generate PDF histograms
+## 3. Run the automated plotting script to generate PDF histograms
 csh makeHists.csh L1TrkNtuple.root
 
 root file name can be edited in L1TrackNtupleMaker_cfg.py's line 131: process.TFileService = cms.Service("TFileService", fileName = cms.string('L1TrkNtuple.root'), closeFileFast = cms.untracked.bool(True))
