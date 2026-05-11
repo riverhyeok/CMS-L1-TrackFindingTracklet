@@ -4,7 +4,7 @@ This readme followed the above repo's procedure.
 # 0. Daily Setup( After you setup the environment)
 /cvmfs/cms.cern.ch/common/cmssw-el8
 
-cd ~/CMSSW_15_1_0_pre4/src
+cd ~/CMSSW_15_1_0_pre4/src 
 cmsenv
 cd L1Trigger/TrackFindingTracklet/test/
 
