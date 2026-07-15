@@ -225,7 +225,7 @@ These plots are used to determine the optimal hard-cut threshold for the final F
 # Print debug line
 In /src/L1Trigger/TrackFindingTracklet/interface/Settings.h 's around 914 line we can change variable false to true for debugging and warning.
 
-We can check output at  /src/L1Trigger/TrackFindingTracklet/test/L1Trigger 's LUTs, MEMPrints folder.
+We can check output at  /src/L1Trigger/TrackFindingTracklet/test/L1Trigger 's LUTs, MEMPrints folder and terminal(because of its length, it's recommended to store terminal log file seperately.)
 
 #  Future Work
 
