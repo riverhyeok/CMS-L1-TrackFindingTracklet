@@ -144,10 +144,10 @@ L1TrkNtuple.root
 ```
 or there are another scripts for emulation
 
-For example: HybridTracksNewKF_cfg.py There is explain about this script.
+For example: HybridTracksNewKF_cfg.py 
 ```
 
- This script runs DTC + prompt tracklet + KF interface + new KF emulator with analyzer for each step
+Written explaniation: This script runs DTC + prompt tracklet + KF interface + new KF emulator with analyzer for each step
  allowing to identify problems quickly during developement.
  This script is a specialized and light-weight version of L1TrackNtupleMaker_cfg.py
  To run execute do
