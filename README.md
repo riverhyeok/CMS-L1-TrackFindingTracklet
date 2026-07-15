@@ -153,7 +153,7 @@ Written explaniation: This script runs DTC + prompt tracklet + KF interface + ne
  To run execute do
  cmsRun L1Trigger/TrackFindingTracklet/test/HybridTracksNewKF_cfg.py
  where the arguments take default values if you don't specify them. You can change defaults below.
-
+```
 
 ### 3. Generate performance plots
 
