@@ -222,8 +222,12 @@ Key plots include:
 These plots are used to determine the optimal hard-cut threshold for the final FPGA firmware.
 
 ---
+# Print debug line
+In /src/L1Trigger/TrackFindingTracklet/interface/Settings.h 's around 914 line we can change variable false to true for debugging and warning.
 
-# 5. Future Work
+We can check output at  /src/L1Trigger/TrackFindingTracklet/test/L1Trigger 's LUTs, MEMPrints folder.
+
+#  Future Work
 
 `Analyzerxx.cc` has not yet been studied.
 
