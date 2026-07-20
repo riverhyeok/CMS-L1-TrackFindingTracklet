@@ -1,192 +1,207 @@
 # CMS-L1-TrackFindingTracklet
 
-This repository documents a workflow for running the **CMS Level-1 Tracklet emulation** using CMSSW.
+This repository documents a workflow for running the **CMS Level-1 Tracklet emulation** using **CMSSW**.
 
-Official reference repository:
+Official repository:
+
 https://github.com/cms-sw/cmssw/tree/master/L1Trigger/TrackFindingTracklet
 
-This README follows the setup and execution procedure described in the official repository.
+This guide follows the setup and execution procedure described in the official repository, with additional notes for local development.
 
 ---
 
-# 0. Daily Setup (after environment is installed)
+# 1. Initial Workspace Setup (First-time Only)
 
-Run these commands every time you start a new session.
+Run these steps only once when creating a new CMSSW workspace.
 
-```
-/cvmfs/cms.cern.ch/common/cmssw-el8
-
-cd ~/CMSSW_15_1_0_pre4/src
-cmsenv
-
-cd L1Trigger/TrackFindingTracklet/test/
-```
-
----
-
-# 1. CMSSW Environment Setup (run once)
-
-These steps are required only when setting up the environment on a new machine.
-
-### 1. Enter the EL8 CMS environment
-
-```
-/cvmfs/cms.cern.ch/common/cmssw-el8
-```
-
-Reference:
-https://cms-sw.github.io/tutorial-merge-usercode-repository-in-cmssw.html
-
----
-
-### 2. Load CMSSW environment variables
-
-```
+```bash
+# Load CMSSW environment
 source /cvmfs/cms.cern.ch/cmsset_default.sh
-```
 
----
+# Create a workspace
+mkdir -p ~/L1TK_Workspace
+cd ~/L1TK_Workspace
 
-### 3. Create the CMSSW release area
-
-```
-cd ~
+# Create the CMSSW release
 cmsrel CMSSW_15_1_0_pre4
-```
 
----
-
-### 4. Initialize the working environment
-
-```
+# Enter the release area
 cd CMSSW_15_1_0_pre4/src
 cmsenv
 ```
 
 ---
 
-# 2. Firmware Branch and Sample Download
+# 2. Repository Setup
 
-Fetch the L1 tracking development branch and download local MC samples to avoid XRootD authentication or timeout issues.
+Fetch the Tracklet development branch from the CMS L1TK repository.
 
-### 1. Initialize the CMSSW git environment
-
-```
+```bash
+# Initialize the CMSSW Git environment
 git cms-init
+
+# Checkout the development topic
 git cms-checkout-topic -u cms-L1TK:fw_synch_250903
-```
 
----
-
-### 2. Clone local MC samples (D98 geometry)
-
-```
-git clone https://github.com/cms-L1TK/MCsamples.git
-```
-
----
-
-### 3. Add the TrackFindingTracklet package
-
-```
+# Add the TrackFindingTracklet package
 git cms-addpkg L1Trigger/TrackFindingTracklet
 ```
 
 ---
 
-# 3. Algorithm Configuration and Compilation
+# 3. Daily Setup
 
-The default configuration uses the **HYBRID tracking algorithm**
-(4-parameter fit for prompt tracks).
+Run these commands every time you open a new terminal.
 
-To include displaced tracks, switch to **HYBRID_DISPLACED**
-(5-parameter fit).
+A valid CMS proxy is required to access remote datasets via XRootD.
 
-### 1. Modify the configuration file
+```bash
+source /cvmfs/cms.cern.ch/cmsset_default.sh
 
-```
-sed -i "s/L1TRKALGO = 'HYBRID'/L1TRKALGO = 'HYBRID_DISPLACED'/g" \
-L1Trigger/TrackFindingTracklet/test/L1TrackNtupleMaker_cfg.py
-```
+cd ~/L1TK_Workspace/CMSSW_15_1_0_pre4/src
+cmsenv
 
-You can also modify the configuration file manually.
+voms-proxy-init -voms cms -valid 192:0
 
----
-
-### 2. Compile the package
-
-```
-scram b -j 8
-```
-
----
-
-# 4. Running the Emulation and Analysis
-
-### 1. Navigate to the test directory
-
-```
 cd L1Trigger/TrackFindingTracklet/test/
 ```
 
 ---
 
-### 2. Run the CMSSW emulation
+# 4. Configuration
+
+## Geometry
+
+Set the detector geometry in your configuration file (e.g. `L1TrackNtupleMaker_cfg.py`):
+
+```python
+GEOMETRY = "D110"
+```
+
+Use the corresponding Phase2Spring24 D110 input samples.
+
+---
+
+## Tracking Algorithm
+
+The default algorithm is
+
+```python
+L1TRKALGO = 'HYBRID_NEWKF'
+```
+
+### Prompt tracking
+
+```python
+L1TRKALGO = 'HYBRID_NEWKF'
+```
+
+### Displaced tracking
+
+```python
+L1TRKALGO = 'HYBRID_DISPLACED'
+```
+
+You can switch automatically using
+
+```bash
+sed -i "s/L1TRKALGO = 'HYBRID_NEWKF'/L1TRKALGO = 'HYBRID_DISPLACED'/g" \
+L1Trigger/TrackFindingTracklet/test/L1TrackNtupleMaker_cfg.py
+```
+
+or edit the configuration manually.
+
+---
+
+## Hardware Truncation Monitoring (Optional)
+
+To study firmware data rates and truncation, edit
 
 ```
+L1Trigger/TrackFindingTracklet/interface/Settings.h
+```
+
+and set
+
+```cpp
+writeMonitorData_ = true;
+```
+
+---
+
+# 5. Compilation
+
+Recompile after modifying any `.cc`, `.h`, or Python configuration files.
+
+```bash
+cd ~/L1TK_Workspace/CMSSW_15_1_0_pre4/src
+
+scram b -j 8
+```
+
+---
+
+# 6. Running the Emulation
+
+Move to the test directory.
+
+```bash
+cd L1Trigger/TrackFindingTracklet/test/
+```
+
+Run the standard ntuple production.
+
+```bash
 cmsRun L1TrackNtupleMaker_cfg.py
 ```
 
-This generates the ROOT file:
+This produces
 
 ```
 L1TrkNtuple.root
 ```
-or there are another scripts for emulation
-
-For example: HybridTracksNewKF_cfg.py 
-```
-
-Written explaniation: This script runs DTC + prompt tracklet + KF interface + new KF emulator with analyzer for each step
- allowing to identify problems quickly during developement.
- This script is a specialized and light-weight version of L1TrackNtupleMaker_cfg.py
- To run execute do
- cmsRun L1Trigger/TrackFindingTracklet/test/HybridTracksNewKF_cfg.py
- where the arguments take default values if you don't specify them. You can change defaults below.
-```
-
-### 3. Generate performance plots
-
-```
-csh makeHists.csh L1TrkNtuple.root
-```
-
-This script runs the ROOT macros:
-
-* `L1TrackNtuplePlot.C`
-* `L1TrackQualityPlot.C`
 
 ---
 
-### ROOT file name
+## Alternative Configuration
 
-The output ROOT file name can be modified in:
+Another useful configuration is
+
+```bash
+cmsRun HybridTracksNewKF_cfg.py
+```
+
+This script runs
+
+- DTC
+- Prompt Tracklet
+- KF interface
+- New KF emulator
+- Analyzer for each processing stage
+
+It is a lightweight version of `L1TrackNtupleMaker_cfg.py` and is useful for debugging because each reconstruction stage can be inspected independently.
+
+---
+
+# 7. Output ROOT File
+
+The output filename is defined in
 
 ```
 L1TrackNtupleMaker_cfg.py
 ```
 
-Example (around line 131):
+Example:
 
-```
+```python
 process.TFileService = cms.Service(
     "TFileService",
-    fileName = cms.string('L1TrkNtuple.root'),
+    fileName = cms.string("L1TrkNtuple.root"),
     closeFileFast = cms.untracked.bool(True)
 )
 ```
 
-If no name is specified, the default file name is:
+If unchanged, the default output is typically
 
 ```
 TTbar_PU200_D76.root
@@ -194,51 +209,105 @@ TTbar_PU200_D76.root
 
 ---
 
-## 3-1. Output Plots
+# 8. Performance Analysis
+
+Generate standard performance plots using
+
+```bash
+csh makeHists.csh L1TrkNtuple.root
+```
+
+This executes the ROOT macros
+
+- `L1TrackNtuplePlot.C`
+- `L1TrackQualityPlot.C`
+
+---
 
 ## L1TrackNtuplePlot.C
 
-Output directory:
+Output directory
 
 ```
 TrkPlots/
 ```
 
-Generates standard tracking performance plots:
+Generates standard tracking performance plots including
 
-* Tracking efficiency vs (p_T)
-* Tracking efficiency vs (\eta)
-* Fake rate
-* Duplicate rate
-* Kalman filter (\chi^2) distributions
+- Tracking efficiency vs. $p_T$
+- Tracking efficiency vs. $\eta$
+- Fake rate
+- Duplicate rate
+- Kalman filter $\chi^2$ distributions
 
 ---
 
 ## L1TrackQualityPlot.C
 
-Output directory:
+Output directory
 
 ```
 MVA_plots/
 ```
 
-Evaluates the **Boosted Decision Tree (BDT)** used in the Track Quality module.
+Evaluates the Boosted Decision Tree (BDT) used by the Track Quality module.
 
-Key plots include:
+Generated plots include
 
-* MVA score distribution
-* ROC curve
+- MVA score distributions
+- ROC curves
 
-These plots are used to determine the optimal hard-cut threshold for the final FPGA firmware.
+These are used to determine the optimal FPGA hard-cut threshold.
 
 ---
-# Print debug line
-In /src/L1Trigger/TrackFindingTracklet/interface/Settings.h 's around 914 line we can change bool variables from false to true for debugging and warning.
 
-We can check output at  /src/L1Trigger/TrackFindingTracklet/test/L1Trigger 's LUTs, MEMPrints folder and terminal(because of its length, it's recommended to store terminal log file seperately.)
+# 9. Debugging
 
-#  Future Work
+Several debugging and warning switches are available in
 
-`Analyzerxx.cc` has not yet been studied.
+```
+src/L1Trigger/TrackFindingTracklet/interface/Settings.h
+```
 
-It seems like compares **firmware and software outputs**, analyzing hardware-oriented objects such as structured **TTStub collections** generated by upstream modules.
+(around line 914).
+
+Changing selected boolean variables from
+
+```cpp
+false
+```
+
+to
+
+```cpp
+true
+```
+
+enables additional debug output.
+
+The generated information can be found in
+
+```
+src/L1Trigger/TrackFindingTracklet/test/L1Trigger/
+```
+
+including directories such as
+
+- `LUTs/`
+- `MEMPrints/`
+
+Large amounts of information are also printed to the terminal, so saving the log is recommended.
+
+Example:
+
+```bash
+cmsRun L1TrackNtupleMaker_cfg.py |& tee run.log
+```
+
+---
+
+# 10. Future Work
+
+The various `Analyzer*.cc` modules have not yet been fully investigated.
+
+Based on the current understanding, they compare firmware and software outputs while analyzing hardware-oriented objects such as structured **TTStub collections** produced by upstream modules.
